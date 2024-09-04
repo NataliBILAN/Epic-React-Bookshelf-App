@@ -1,84 +1,108 @@
-// 🐨 you'll need to import react and createRoot from react-dom up here
+/** @jsx jsx */
+import {jsx} from '@emotion/core'
 
-// 🐨 you'll also need to import the Logo component from './components/logo'
-
-// 🐨 create an App component here and render the logo, the title ("Bookshelf"), a login button, and a register button.
-// 🐨 for fun, you can add event handlers for both buttons to alert that the button was clicked
-
-// 🐨 use createRoot to render the <App /> to the root element
-// 💰 find the root element with: document.getElementById('root')
-
-import React, {useState} from 'react'
-import ReactDom from 'react-dom'
-
-import {Logo} from './components/logo'
-import {Dialog} from '@reach/dialog'
+import 'bootstrap/dist/css/bootstrap-reboot.css'
+// 🦉 Note: you can definitely use regular styles to style React apps
+// and using any modern toolchain will allow you to simply import the CSS file
+// but CSS-in-JS is generally easier to maintain.
 import '@reach/dialog/styles.css'
+import * as React from 'react'
+import {createRoot} from 'react-dom/client'
+import {Button, Input, FormGroup, Spinner} from './components/lib'
+import {Modal, ModalContents, ModalOpenButton} from './components/modal'
+import {Logo} from './components/logo'
 
+function LoginForm({onSubmit, submitButton}) {
+  function handleSubmit(event) {
+    event.preventDefault()
+    const {username, password} = event.target.elements
 
-function Form({onSubmit, buttonText}) {
-    function handleSubmit(event) {
-      event.preventDefault()
-      const {username, password} = event.target.elements
-  
-      onSubmit({
-        username: username.value,
-        password: password.value,
-      })
-    }
+    onSubmit({
+      username: username.value,
+      password: password.value,
+    })
+  }
 
-    return (
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username</label>
-          <input id="username" />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" />
-        </div>
-        <div>
-          <button type="submit">{buttonText}</button>
-        </div>
-      </form>
-    )
+  return (
+    <form
+      onSubmit={handleSubmit}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        '> div': {
+          margin: '10px auto',
+          width: '100%',
+          maxWidth: '300px',
+        },
+      }}
+    >
+      <FormGroup>
+        <label htmlFor="username">Username</label>
+        <Input id="username" />
+      </FormGroup>
+      <FormGroup>
+        <label htmlFor="password">Password</label>
+        <Input id="password" type="password" />
+      </FormGroup>
+      <div>
+        {React.cloneElement(submitButton, {type: 'submit'})}
+        <Spinner aria-label="Loading" />
+      </div>
+    </form>
+  )
 }
 
 function App() {
-const [openModal, setOpenModal]= useState('none')
+  function login(formData) {
+    console.log('login', formData)
+  }
 
-const handleLogin = (formData) => {
-    console.log('login data', formData)
+  function register(formData) {
+    console.log('register', formData)
+  }
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: '100vh',
+      }}
+    >
+      <Logo width="80" height="80" />
+      <h1>Bookshelf</h1>
+      <div>
+        <Modal>
+          <ModalOpenButton>
+            <Button variant="primary">Login</Button>
+          </ModalOpenButton>
+          <ModalContents aria-label="Login form" title="Login">
+            <LoginForm
+              onSubmit={login}
+              submitButton={<Button variant="primary">Login</Button>}
+            />
+          </ModalContents>
+        </Modal>
+        <Modal>
+          <ModalOpenButton>
+            <Button variant="secondary">Register</Button>
+          </ModalOpenButton>
+          <ModalContents aria-label="Registration form" title="Register">
+            <LoginForm
+              onSubmit={register}
+              submitButton={<Button variant="secondary">Register</Button>}
+            />
+          </ModalContents>
+        </Modal>
+      </div>
+    </div>
+  )
 }
 
-const handleRegister = (formData) => {
-    console.log('registartion data', formData)
-}
-    return (
-        <div>
-            <Logo width="80" height="80" />
-            <h1>Bookshelf</h1>
-            <div>
-                <button onClick={() => setOpenModal('login')}>Login</button>
-            </div>
-            <div>
-                <button onClick={() => setOpenModal('register')}>Register</button>
-            </div>
-            <Dialog aria-label='Login form' isOpen={openModal === 'login'}>
-                <button onClick={() => setOpenModal('none')}>Close</button>
-                <h3>Log in</h3>
-                <Form onSubmit={handleLogin} buttonText="Login" />
-            </Dialog>
-
-            <Dialog aria-label='Registration form' isOpen={openModal === 'register'}>
-                <button onClick={() => setOpenModal('none')}>Close</button>
-                <h3>Register</h3>
-                <Form onSubmit={handleRegister} buttonText="Register" />
-
-            </Dialog>
-        </div>
-    )
-}
-
-ReactDom.render(<App />, document.getElementById('root'))
-
+const root = createRoot(document.getElementById('root'))
+root.render(<App />)
+export {root}
